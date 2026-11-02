@@ -431,6 +431,20 @@ ol.tl li.tl-now .tl-y{color:var(--accent)}
 .lesson .chip{white-space:normal;max-width:100%}
 .chips-rows > div{min-width:0}
 
+/* Lo esencial: las 100 preguntas del documento. Marca-texto a la izquierda para distinguirlo de los simulacros. */
+.mode.ess-mode{grid-column:1/-1;grid-template-columns:minmax(0,1fr);box-shadow:inset 6px 0 0 var(--marker);padding-left:24px;gap:12px}
+.ess-ctl{min-width:0}
+.ess-mode p{max-width:68ch}
+.ess-prog{display:grid;gap:6px;max-width:520px}
+.ess-ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.mode .ess-ctl select{width:auto;flex:1 1 260px;max-width:440px;min-width:0}
+.ess-card{display:grid;gap:12px;box-shadow:inset 6px 0 0 var(--marker),var(--shadow);padding-left:26px}
+.ess-card .section-h{margin-bottom:0}
+.ess-sum{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ess-tag{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--marker-ink);background:var(--marker);padding:2px 8px;border-radius:5px;white-space:nowrap}
+.ess-mod{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between;margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--line);box-shadow:inset 4px 0 0 var(--marker)}
+.ess-mod span{min-width:0;flex:1 1 240px;font-size:15px}
+
 </style>
 <div class="app">
   <header class="mtop">
@@ -4998,6 +5012,16 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
   var TOP = {}; MODS.forEach(function (m) { TOP[m.id] = { name: m.short, mod: m.id, unit: m.unit }; });
   var QMAP = {}; QS.forEach(function (q) { QMAP[q.id] = q; });
   var MMAP = {}; MODS.forEach(function (m) { MMAP[m.id] = m; });
+  /* Lo esencial: las 100 preguntas del documento de preguntas y respuestas, en el mismo orden (n.º 1 a 100):
+     una por cada punto que cayó en los ejercicios, 25 por unidad. */
+  var ESS = ["u1-c-hist1","u1-c-hist2","u1-c-tac1","u1-c-seci1","u1-c-comp1","u1-c-des1","u1-c-comp2","u1-v-inov1","u1-v-comp1","u1-v-efic1","u1-v-ret1","u1-v-cult1","u1-v-dec1","u1-s-dic1","u1-s-fer1","u1-s-crit1","u1-s-eco1","u1-s-int1","u1-s-est1","u1-k-tac1","u1-k-exp1","u1-k-rep1","u1-k-kms1","u1-k-qual1","u1-k-pad1",
+    "u2-sgc-1","u2-sgc-3","u2-sgc-5","u2-sgc-8","u2-sgc-11","u2-sgc-12","u2-rsc-1","u2-rsc-3","u2-rsc-5","u2-rsc-7","u2-rsc-9","u2-rsc-13","u2-dm-5","u2-dm-6","u2-dm-8","u2-dm-10","u2-dm-12","u2-dm-2","u2-dm-15","u2-comp-1","u2-comp-3","u2-comp-7","u2-comp-11","u2-comp-13","u2-comp-9",
+    "u3-c02","u3-c04","u3-c05","u3-c06","u3-c07","u3-c11","u3-c09","u3-m01","u3-m02","u3-m03","u3-m05","u3-m06","u3-m07","u3-f01","u3-f02","u3-f03","u3-f04","u3-f05","u3-f07","u3-o01","u3-o03","u3-o04","u3-o05","u3-o06","u3-o08",
+    "u4-cm-03","u4-cm-06","u4-cm-07","u4-cm-09","u4-cm-11","u4-cm-13","u4-cm-14","u4-ai-02","u4-ai-05","u4-ai-08","u4-ai-13","u4-ai-15","u4-ai-10","u4-cl-02","u4-cl-04","u4-cl-06","u4-cl-08","u4-cl-12","u4-cl-14","u4-pr-01","u4-pr-05","u4-pr-07","u4-pr-09","u4-pr-11","u4-pr-03"];
+  var ESSN = {}; ESS.forEach(function (id, i) { ESSN[id] = i + 1; });
+  ESS = ESS.filter(function (id) { return QMAP[id]; });
+  var DOC_URL = 'https://claude.ai/artifact/EY7ePLhwJzUg9m1VX8ncRw';
+  var essUI = { scope: 'all', pend: true, mix: false };
   var LS = 'gc-estudo-v1', LS_SESS = 'gc-sesion-v1';
   var L = 'ABCDE';
   var EXAM_N = 20;
@@ -5011,6 +5035,7 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
   function mmss(s) { s = Math.max(0, Math.round(s)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
   function pctColor(p) { return p < 0.5 ? 'var(--bad)' : p < 0.75 ? 'var(--warn)' : 'var(--good)'; }
   function fmtDate(ts) { try { return new Date(ts).toLocaleDateString('es', { day: 'numeric', month: 'short' }) + ' · ' + new Date(ts).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+  function rich(s) { return esc(s).replace(/&lt;(\/?)(b|i)&gt;/g, '<$1$2>'); }
   function hitsN(m) { return (m.hits || []).length; }
   function utag(u) { return '<span class="utag u' + u + '">Unidade ' + u + '</span>'; }
   var toastT;
@@ -5021,7 +5046,7 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
   }
 
   /* ---------------- estado y guardado ---------------- */
-  function blank() { return { v: 1, updatedAt: 0, mods: {}, notes: {}, exams: [], wrong: {}, stats: {}, seen: {}, cards: {}, examDate: '' }; }
+  function blank() { return { v: 1, updatedAt: 0, mods: {}, notes: {}, exams: [], wrong: {}, stats: {}, seen: {}, cards: {}, ess: {}, examDate: '' }; }
   function norm(s) {
     var b = blank();
     if (!s || typeof s !== 'object' || s.v !== 1) return b;
@@ -5095,6 +5120,18 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
     var s = state.stats[q.t] || [0, 0]; s = [s[0] + (ok ? 1 : 0), s[1] + 1]; state.stats[q.t] = s;
     state.seen[q.id] = (state.seen[q.id] || 0) + 1;
     if (ok) delete state.wrong[q.id]; else state.wrong[q.id] = 1;
+    if (ESSN[q.id]) state.ess[q.id] = ok ? 1 : 0;
+  }
+
+  /* Lo esencial: alcance = 'all', 'u1'…'u4' o el id de un módulo */
+  function essIn(scope) {
+    return ESS.filter(function (id) { var t = QMAP[id].t; return scope === 'all' || t === scope || (/^u[1-4]$/.test(scope) && 'u' + TOP[t].unit === scope); });
+  }
+  function essScopeName(scope) { return scope === 'all' ? 'Toda la materia' : /^u[1-4]$/.test(scope) ? 'Unidade ' + scope.charAt(1) : TOP[scope] ? TOP[scope].name : ''; }
+  function essStats(scope) {
+    var ids = essIn(scope), ok = 0, bad = 0;
+    ids.forEach(function (id) { if (state.ess[id] === 1) ok++; else if (state.ess[id] === 0) bad++; });
+    return { n: ids.length, ok: ok, bad: bad, left: ids.length - ok };
   }
 
   function pickFrom(pool, n, gens) {
@@ -5147,16 +5184,30 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
       var ids = Array.isArray(arg) ? arg : Object.keys(state.wrong);
       items = makeItems(shuffle(ids.filter(function (id) { return QMAP[id]; }).map(function (id) { return QMAP[id]; })).slice(0, 20));
       title = 'Repaso de errores';
+    } else if (kind === 'ess') {
+      arg = arg || {}; var scope = arg.scope || 'all', eids = essIn(scope);
+      if (arg.pend) {
+        eids = eids.filter(function (id) { return state.ess[id] !== 1; });
+        if (!eids.length) { toast('Ya acertaste todas las esenciales de ' + essScopeName(scope) + '.'); return; }
+      }
+      var eqs = eids.map(function (id) { return QMAP[id]; });
+      items = makeItems(arg.mix ? shuffle(eqs) : eqs);
+      title = 'Lo esencial · ' + essScopeName(scope) + (arg.pend ? ' · las que faltan' : '');
     }
     if (!items || !items.length) { toast('No hay preguntas para este modo todavía.'); return; }
     var replaced = sess && !sess.fin;
-    sess = { mode: mode, title: title, items: items, ans: items.map(function () { return null; }), cur: 0, start: Date.now(), fin: false };
+    sess = { mode: mode, kind: kind, cfg: kind === 'ess' ? { scope: arg.scope || 'all', mix: !!arg.mix } : null, title: title, items: items, ans: items.map(function () { return null; }), cur: 0, start: Date.now(), fin: false };
     saveSess();
     if (replaced) toast('Empezaste un intento nuevo.');
     go('simulado');
   }
 
   function finishSession() {
+    if (sess.mode !== 'exam') {
+      /* En práctica se puede terminar antes: el resultado cuenta solo lo que respondiste */
+      var keep = []; sess.ans.forEach(function (a, i) { if (a != null) keep.push(i); });
+      sess.items = keep.map(function (i) { return sess.items[i]; }); sess.ans = keep.map(function (i) { return sess.ans[i]; });
+    }
     var byTopic = {}, ok = 0;
     sess.items.forEach(function (it, i) {
       var q = QMAP[it.id], a = sess.ans[i], good = a != null && it.order[a] === 0;
@@ -5255,6 +5306,8 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
       '<div class="tile"><span class="tile-n">' + (last ? nota(last.score) : '–') + '</span><span class="tile-l">Último simulacro' + (last ? ' · ' + last.ok + '/' + last.n : '') + '</span></div>' +
       '</section>';
 
+    h += essCardHTML();
+
     if (next) {
       h += '<section class="card next"><span class="eyebrow">Siguiente paso · Unidade ' + next.unit + ' · módulo ' + next.n + '</span><h2>' + esc(next.title) + '</h2><p>' + esc(next.sub) + ' · ' + next.min + ' min</p><div class="row"><a class="btn btn-primary" href="#m-' + next.id + '">Estudiar ahora</a></div></section>';
     } else {
@@ -5293,6 +5346,27 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
     return h;
   }
 
+  /* Tarjeta "Lo esencial" del Panel: progreso total y por unidad */
+  function essBtn(scope, st, cls, txt) {
+    return '<button class="btn ' + cls + '" data-act="ess-scope" data-scope="' + scope + '"' + (st.left ? ' data-pend' : '') + '>' + txt + '</button>';
+  }
+  function essCardHTML() {
+    var all = essStats('all');
+    var h = '<section class="card ess-card"><div class="section-h"><h2>Lo esencial</h2><span class="eyebrow">Las ' + all.n + ' preguntas del documento</span></div>' +
+      '<p class="muted">Una pregunta por cada punto que cayó en tus ejercicios, 25 por unidad. Si tienes poco tiempo, empieza por aquí.</p>' +
+      '<div class="ess-sum"><span class="tile-n">' + all.ok + '<small>/' + all.n + '</small></span><span class="tile-l">acertadas' + (all.bad ? ' · ' + all.bad + ' por repasar' : '') + (all.n - all.ok - all.bad ? ' · ' + (all.n - all.ok - all.bad) + ' sin responder' : '') + '</span></div>' +
+      '<div class="meter" aria-hidden="true"><i style="width:' + (all.n ? all.ok / all.n * 100 : 0) + '%;background:var(--good)"></i></div>' +
+      '<div class="mastery">' + [1, 2, 3, 4].map(function (u) {
+        var s = essStats('u' + u), p = s.n ? s.ok / s.n : 0;
+        return '<div class="m-row"><span class="m-name"><span class="utag u' + u + '">U' + u + '</span> ' + esc(UNITS[u]) + '</span>' +
+          '<div class="m-bar" aria-hidden="true"><i style="width:' + Math.round(p * 100) + '%;background:var(--good)"></i></div>' +
+          '<span class="m-pct">' + s.ok + '/' + s.n + '</span>' + essBtn('u' + u, s, 'btn-sm btn-quiet m-act', s.left ? 'Practicar' : 'Repetir') + '</div>';
+      }).join('') + '</div>' +
+      '<div class="row">' + essBtn('all', all, 'btn-primary', all.left ? (all.ok ? 'Seguir con las ' + all.left + ' que faltan' : 'Empezar las ' + all.n) : 'Repasar las ' + all.n + ' otra vez') +
+      '<a class="btn btn-quiet" href="#simulado">Elegir unidad o tema</a></div></section>';
+    return h;
+  }
+
   /* ---------------- ESTUDIAR ---------------- */
   function prioTag(m) { return (m.prio === 3 ? '<span class="prio prio-3">Muy preguntado</span>' : '<span class="prio prio-2">Importante</span>') + '<span class="tag">' + hitsN(m) + ' en los ejercicios</span>'; }
   function studyHTML() {
@@ -5320,7 +5394,10 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
       '<div class="row"><button class="btn btn-sm' + (d ? '' : ' btn-primary') + '" data-act="toggle-done" data-mod="' + m.id + '" aria-pressed="' + (!!d) + '">' + (d ? '✓ Estudiado' : 'Marcar como estudiado') + '</button>' + (d ? '<span class="stamp" style="--stamp:var(--good)">Estudado</span>' : '') + '</div></header>';
     h += '<section class="summary"><h2>En 30 segundos <span class="eyebrow">para memorizar</span></h2><ul>' + m.summary.map(function (s) { return '<li><span>' + s + '</span></li>'; }).join('') + '</ul></section>';
     h += '<article class="lesson">' + m.body + '</article>';
-    h += '<section class="mini-wrap"><div class="section-h"><h2>Comprueba lo que aprendiste</h2><button class="btn btn-sm btn-quiet" data-act="mini-new">Otras preguntas</button></div><p class="muted" style="margin-bottom:12px">Preguntas en portugués, como en la prueba.</p><div class="mini" data-mini></div></section>';
+    var es = essStats(m.id);
+    h += '<section class="mini-wrap"><div class="section-h"><h2>Comprueba lo que aprendiste</h2><button class="btn btn-sm btn-quiet" data-act="mini-new">Otras preguntas</button></div><p class="muted" style="margin-bottom:12px">Preguntas en portugués, como en la prueba.</p><div class="mini" data-mini></div>' +
+      (es.n ? '<div class="ess-mod"><span><b>Lo esencial de este módulo:</b> ' + es.n + ' preguntas, una por cada punto que cayó. Acertaste ' + es.ok + ' de ' + es.n + '.</span><button class="btn btn-sm" data-act="ess-scope" data-scope="' + m.id + '">Practicar las ' + es.n + '</button></div>' : '') +
+      '</section>';
     h += '<section class="note-item"><label for="note-' + m.id + '">Mis notas de este módulo <span class="saved" data-saved="' + m.id + '"></span></label><textarea id="note-' + m.id + '" data-note="' + m.id + '" placeholder="Escribe aquí lo que te cuesta recordar o una duda para la profesora"></textarea></section>';
     h += '<div class="row-between">' + (prev ? '<a class="btn" href="#m-' + prev.id + '">← ' + esc(prev.title) + '</a>' : '<span></span>') +
       (nxt ? '<a class="btn btn-primary" href="#m-' + nxt.id + '" data-act="next-mod" data-mod="' + m.id + '">' + esc(nxt.title) + ' →</a>' : '<a class="btn btn-primary" href="#simulado">Ir a los simulacros →</a>') + '</div>';
@@ -5339,7 +5416,7 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
 
   function refBadge(q, pre) { return q.ref ? '<span class="badge-prova" style="justify-self:start">' + (pre || 'Cayó en los ejercicios') + ' · ' + esc(q.ref) + '</span>' : ''; }
   function qHTML(q, order, chosen, reveal, label) {
-    var h = '<div class="qcard" data-qid="' + esc(q.id) + '"><div class="q-meta"><span class="eyebrow">U' + TOP[q.t].unit + ' · ' + esc(TOP[q.t].name) + (label ? ' · ' + esc(label) : '') + '</span></div>' +
+    var h = '<div class="qcard" data-qid="' + esc(q.id) + '"><div class="q-meta"><span class="eyebrow">U' + TOP[q.t].unit + ' · ' + esc(TOP[q.t].name) + (label ? ' · ' + esc(label) : '') + '</span>' + (ESSN[q.id] ? '<span class="ess-tag" title="Es la pregunta ' + ESSN[q.id] + ' del documento de preguntas y respuestas">Esencial · n.º ' + ESSN[q.id] + '</span>' : '') + '</div>' +
       '<p class="q-text">' + esc(q.q) + '</p><div class="opts" role="group" aria-label="Alternativas">';
     order.forEach(function (ai, di) {
       var cls = 'opt';
@@ -5350,7 +5427,7 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
     h += '</div>';
     if (reveal) {
       var ok = order[chosen] === 0;
-      h += '<div class="fb ' + (ok ? 'ok' : 'no') + '" role="status"><span class="fb-h">' + (ok ? 'Correcto' : 'Incorrecto · la correcta es la ' + L[order.indexOf(0)]) + '</span><span>' + esc(q.exp) + '</span>' + refBadge(q, 'Este punto cayó en los ejercicios') + '</div>';
+      h += '<div class="fb ' + (ok ? 'ok' : 'no') + '" role="status"><span class="fb-h">' + (ok ? 'Correcto' : 'Incorrecto · la correcta es la ' + L[order.indexOf(0)]) + '</span><span>' + rich(q.exp) + '</span>' + refBadge(q, 'Este punto cayó en los ejercicios') + '</div>';
     }
     return h + '</div>';
   }
@@ -5400,7 +5477,7 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
       }).join('') + '</div>';
       if (answered) {
         var ok = answered === it[1];
-        h += '<div class="clsf-fb ' + (ok ? 'ok' : 'no') + '" role="status"><b>' + (ok ? 'Correcto: ' : 'No: es ') + esc(cat(it[1])) + '</b>' + esc(it[2]) + '</div><div class="row"><button type="button" class="btn btn-primary" data-c="next">Siguiente</button></div>';
+        h += '<div class="clsf-fb ' + (ok ? 'ok' : 'no') + '" role="status"><b>' + (ok ? 'Correcto: ' : 'No: es ') + esc(cat(it[1])) + '</b>' + rich(it[2]) + '</div><div class="row"><button type="button" class="btn btn-primary" data-c="next">Siguiente</button></div>';
       }
       el.innerHTML = h + '</div>';
     }
@@ -5425,7 +5502,18 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
     if (sess) return runnerHTML();
     var wrongN = Object.keys(state.wrong).filter(function (id) { return QMAP[id]; }).length;
     var h = '<header class="mod-head"><span class="eyebrow">Simulacros</span><h1>Practica como en la prueba</h1><p class="sub">Cada intento elige preguntas distintas, prioriza las que menos viste y mezcla el orden de las alternativas. Los formatos son los de tus ejercicios: directa, INCORRETA, afirmativas I a IV, V o F, associação y lacunas.</p></header>';
+    var ea = essStats('all'), sel = essIn(essUI.scope), selN = essUI.pend ? sel.filter(function (id) { return state.ess[id] !== 1; }).length : sel.length;
     h += '<div class="modes">' +
+      '<div class="mode ess-mode"><span class="eyebrow">Lo más importante · ' + ea.n + ' preguntas</span><h3>Lo esencial</h3>' +
+      '<p>Una pregunta por cada punto que cayó en tus ejercicios: las mismas del <a href="' + DOC_URL + '" target="_blank" rel="noopener">documento de preguntas y respuestas</a>, con su número. Ves la respuesta y la explicación al instante, y puedes terminar cuando quieras.</p>' +
+      '<div class="ess-prog"><div class="row-between"><b>Acertaste ' + ea.ok + ' de ' + ea.n + '</b><span class="muted">' + (ea.bad ? ea.bad + ' por repasar' : '') + '</span></div><div class="meter" aria-hidden="true"><i style="width:' + (ea.n ? ea.ok / ea.n * 100 : 0) + '%;background:var(--good)"></i></div></div>' +
+      '<div class="ess-ctl"><label class="sr" for="ess-scope">Qué preguntas</label><select id="ess-scope">' +
+      ['all', 'u1', 'u2', 'u3', 'u4'].map(function (s) { var st = essStats(s); return '<option value="' + s + '"' + (essUI.scope === s ? ' selected' : '') + '>' + (s === 'all' ? 'Toda la materia' : 'Unidade ' + s.charAt(1) + ' · ' + esc(UNITS[+s.charAt(1)])) + ' (' + st.ok + '/' + st.n + ')</option>'; }).join('') +
+      topicOptions(essUI.scope) + '</select>' +
+      '<label class="check"><input type="checkbox" id="ess-pend"' + (essUI.pend ? ' checked' : '') + '> Solo las que me faltan</label>' +
+      '<label class="check"><input type="checkbox" id="ess-mix"' + (essUI.mix ? ' checked' : '') + '> Mezclar el orden</label></div>' +
+      '<div class="row"><button class="btn btn-primary" data-act="start-ess"' + (selN ? '' : ' disabled') + '>' + (selN ? 'Empezar · ' + selN + (selN === 1 ? ' pregunta' : ' preguntas') : 'Ya acertaste todas') + '</button>' +
+      (!selN ? '<span class="muted">Desmarca "Solo las que me faltan" para repetirlas.</span>' : '') + '</div></div>' +
       '<div class="mode main-mode"><span class="eyebrow">Toda la materia · ' + EXAM_N + ' preguntas</span><h3>Simulacro completo</h3><p>5 preguntas por unidad, repartidas según lo que más cayó en tus ejercicios. Ves la corrección al final.</p><button class="btn btn-primary" data-act="start-exam">Empezar simulacro</button></div>' +
       '<div class="mode"><span class="eyebrow">Una unidad · 10 preguntas</span><h3>Simulacro por unidad</h3><label class="sr" for="unit-sel">Unidad</label><select id="unit-sel">' + [1, 2, 3, 4].map(function (u) { return '<option value="' + u + '">Unidade ' + u + ' · ' + esc(UNITS[u]) + '</option>'; }).join('') + '</select><button class="btn" data-act="start-unit">Empezar</button></div>' +
       '<div class="mode"><span class="eyebrow">10 preguntas</span><h3>Práctica rápida</h3><p>Mezcla de todos los temas. Ves la respuesta y la explicación al instante.</p><button class="btn" data-act="start-quick">Empezar</button></div>' +
@@ -5460,8 +5548,9 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
       h += '<section class="card"><div class="section-h"><h3>Mapa de la prova</h3><button type="button" class="btn btn-sm" data-act="finish">Entregar</button></div><div class="qgrid">' +
         sess.items.map(function (_, i) { return '<button type="button" class="qn' + (sess.ans[i] != null ? ' ans' : '') + (i === cur ? ' cur' : '') + '" data-jump="' + i + '" aria-label="Pregunta ' + (i + 1) + (sess.ans[i] != null ? ', respondida' : '') + '">' + (i + 1) + '</button>'; }).join('') + '</div></section>';
     }
-    h += confirmQuit ? '<div class="confirm"><b>¿Salir sin terminar?</b><span>Se pierde este intento.</span><div class="row"><button type="button" class="btn" data-act="quit-yes">Salir</button><button type="button" class="btn btn-primary" data-act="quit-no">Seguir</button></div></div>'
-      : '<div><button type="button" class="btn btn-quiet btn-sm" data-act="quit">Salir del simulacro</button></div>';
+    h += confirmQuit ? '<div class="confirm"><b>¿Salir sin terminar?</b><span>' + (exam ? 'Se pierde este intento.' : 'No vas a ver el resultado de esta ronda, pero lo que respondiste ya quedó guardado en tu progreso.') + '</span><div class="row"><button type="button" class="btn" data-act="quit-yes">Salir</button><button type="button" class="btn btn-primary" data-act="quit-no">Seguir</button></div></div>'
+      : '<div class="row">' + (!exam && answered && answered < n ? '<button type="button" class="btn btn-sm" data-act="finish-early">Terminar aquí y ver resultado</button>' : '') +
+        '<button type="button" class="btn btn-quiet btn-sm" data-act="quit">' + (exam ? 'Salir del simulacro' : 'Salir') + '</button></div>';
     return h + '</div>';
   }
 
@@ -5470,7 +5559,7 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
     var msg = p >= 0.8 ? 'Muy bien: estás listo. Repite un simulacro más para confirmar.' : p >= 0.6 ? 'Vas bien. Repasa los temas en rojo y amarillo.' : 'Repasa los módulos de los temas en rojo y vuelve a intentarlo.';
     var wrongIds = sess.items.filter(function (it, i) { return !(sess.ans[i] != null && it.order[sess.ans[i]] === 0); }).map(function (it) { return it.id; });
     var h = '<header class="result-head"><span class="eyebrow">' + esc(sess.title) + ' · terminado</span><div class="score"><span class="score-n">' + nota(r.score) + '<small>/10</small></span><span class="stamp" style="--stamp:' + pctColor(p) + '">' + r.ok + ' de ' + r.n + ' acertos</span></div><p class="muted">Tiempo: ' + mmss(r.secs) + '. ' + msg + '</p>' +
-      '<div class="row"><button type="button" class="btn btn-primary" data-act="start-exam">Otro simulacro</button>' + (wrongIds.length ? '<button type="button" class="btn" data-act="practice-these" data-ids="' + esc(wrongIds.join(',')) + '">Practicar las ' + wrongIds.length + ' que fallé</button>' : '') + '<button type="button" class="btn btn-quiet" data-act="close-result">Volver a simulacros</button></div></header>';
+      '<div class="row">' + (sess.kind === 'ess' ? (function () { var s = essStats(sess.cfg ? sess.cfg.scope : 'all'); return s.left ? '<button type="button" class="btn btn-primary" data-act="ess-again">Seguir con las ' + s.left + ' esenciales que faltan</button>' : '<span class="stamp" style="--stamp:var(--good)">Esenciales completas</span>'; })() : '<button type="button" class="btn btn-primary" data-act="start-exam">Otro simulacro</button>') + (wrongIds.length ? '<button type="button" class="btn" data-act="practice-these" data-ids="' + esc(wrongIds.join(',')) + '">Practicar las ' + wrongIds.length + ' que fallé</button>' : '') + '<button type="button" class="btn btn-quiet" data-act="close-result">Volver a simulacros</button></div></header>';
     h += '<section class="card"><div class="section-h"><h2>Por tema</h2></div><div class="mastery">' + Object.keys(r.byTopic).sort(function (a, b) { return MMAP[a].n - MMAP[b].n; }).map(function (t) {
       var b = r.byTopic[t], pp = b[0] / b[1];
       return '<div class="m-row"><span class="m-name"><span class="utag u' + TOP[t].unit + '">U' + TOP[t].unit + '</span> ' + esc(TOP[t].name) + '</span><div class="m-bar" aria-hidden="true"><i style="width:' + Math.round(pp * 100) + '%;background:' + pctColor(pp) + '"></i></div><span class="m-pct">' + b[0] + '/' + b[1] + '</span>' + (pp < 1 ? '<a class="btn btn-sm btn-quiet m-act" href="#m-' + TOP[t].mod + '">Repasar módulo</a>' : '<span></span>') + '</div>';
@@ -5479,7 +5568,7 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
       var q = QMAP[it.id], a = sess.ans[i], ok = a != null && it.order[a] === 0;
       return '<div class="rv ' + (ok ? 'ok' : 'no') + '"><div class="rv-h"><span class="rv-n">' + (i + 1) + '</span><b class="q-text" style="font-size:16px">' + esc(q.q) + '</b></div><div class="rv-a">' +
         (ok ? '' : '<span>Tu respuesta</span><span>' + (a == null ? '<i>Sin responder</i>' : esc(q.a[it.order[a]])) + '</span>') +
-        '<span>Correcta</span><span>' + esc(q.a[0]) + '</span></div><p class="rv-exp">' + esc(q.exp) + '</p>' + refBadge(q) + '</div>';
+        '<span>Correcta</span><span>' + esc(q.a[0]) + '</span></div><p class="rv-exp">' + rich(q.exp) + '</p>' + refBadge(q) + '</div>';
     }).join('') + '</section>';
     return h;
   }
@@ -5509,7 +5598,7 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
       var c = CARDS[fc.deck[fc.pos]];
       h += '<div class="flash' + (fc.flip ? ' flip' : '') + '"><div class="flash-in">' +
         '<button type="button" class="face face-front" data-act="flip" aria-label="Mostrar respuesta"' + (fc.flip ? ' tabindex="-1" aria-hidden="true"' : '') + '><span class="eyebrow">U' + TOP[c[0]].unit + ' · ' + esc(TOP[c[0]].name) + '</span><b>' + esc(c[1]) + '</b><span class="face-hint">Toca para ver la respuesta</span></button>' +
-        '<button type="button" class="face face-back" data-act="flip" aria-label="Volver a la pregunta"' + (fc.flip ? '' : ' tabindex="-1" aria-hidden="true"') + '><span class="eyebrow">' + esc(c[1]) + '</span><span>' + esc(c[2]) + '</span></button>' +
+        '<button type="button" class="face face-back" data-act="flip" aria-label="Volver a la pregunta"' + (fc.flip ? '' : ' tabindex="-1" aria-hidden="true"') + '><span class="eyebrow">' + esc(c[1]) + '</span><span>' + rich(c[2]) + '</span></button>' +
         '</div></div>';
       h += '<div class="row"><button type="button" class="btn" data-act="fc-again">Otra vez</button><button type="button" class="btn btn-primary" data-act="fc-know">Ya la sé</button><button type="button" class="btn btn-quiet" data-act="fc-shuffle">Mezclar</button></div>';
     }
@@ -5555,6 +5644,10 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
     if (dateIn) dateIn.addEventListener('change', function () { state.examDate = dateIn.value || ''; save(); render(false); });
     var fcT = document.getElementById('fc-topic');
     if (fcT) fcT.addEventListener('change', function () { fc.topic = fcT.value; buildDeck(); render(false); });
+    [['ess-scope', 'scope', 'value'], ['ess-pend', 'pend', 'checked'], ['ess-mix', 'mix', 'checked']].forEach(function (c) {
+      var el = document.getElementById(c[0]);
+      if (el) el.addEventListener('change', function () { essUI[c[1]] = el[c[2]]; render(false); var again = document.getElementById(c[0]); if (again) again.focus(); });
+    });
     var fcP = document.getElementById('fc-pend');
     if (fcP) fcP.addEventListener('change', function () { fc.pend = fcP.checked; buildDeck(); render(false); });
   }
@@ -5597,6 +5690,12 @@ GC.cards.push(['ao-modelos', 'Modelos híbridos', 'Interação e humanização d
       case 'start-topic-sel': startSession('topic', document.getElementById('topic-sel').value); break;
       case 'start-wrong': startSession('wrong'); break;
       case 'practice-these': startSession('wrong', b.getAttribute('data-ids').split(',')); break;
+      case 'start-ess': startSession('ess', { scope: essUI.scope, pend: essUI.pend, mix: essUI.mix }); break;
+      case 'ess-scope': startSession('ess', { scope: b.getAttribute('data-scope'), pend: b.hasAttribute('data-pend'), mix: false }); break;
+      case 'ess-again': startSession('ess', { scope: sess.cfg ? sess.cfg.scope : 'all', pend: true, mix: sess.cfg ? sess.cfg.mix : false }); break;
+      case 'finish-early':
+        if (sess && sess.ans.some(function (a) { return a != null; })) finishSession(); else { sess = null; saveSess(); }
+        render(true); break;
       case 'prev': if (sess.cur > 0) { sess.cur--; confirmFinish = false; saveSess(); render(true); } break;
       case 'next': if (sess.cur < sess.items.length - 1) { sess.cur++; confirmFinish = false; saveSess(); render(true); } break;
       case 'finish':
